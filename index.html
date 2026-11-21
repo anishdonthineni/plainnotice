@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PlainNotice: understand any official letter</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fbfaf6;--fg:#1d2433;--mut:#566074;--card:#fff;--bd:#d6d2c6;--ac:#0b6b5d;--acfg:#fff;--warn:#fff1d6;--wbd:#c98a00;--bad:#fde4e1;--bbd:#c0392b;--ok:#e3f4ea;--obd:#2e8b57;--hl:#fff0a0}
+html{scroll-padding-top:env(safe-area-inset-top,0px);font-size:17px}
+html.big{font-size:21px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#12161d;--fg:#eef1f6;--mut:#a3adbf;--card:#1b212b;--bd:#364050;--ac:#4cc3ae;--acfg:#0a1a17;--warn:#3a2f12;--wbd:#e0a82e;--bad:#401c19;--bbd:#ef7b6e;--ok:#12332140;--obd:#5fc98a;--hl:#5a4f10}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#12161d;--fg:#eef1f6;--mut:#a3adbf;--card:#1b212b;--bd:#364050;--ac:#4cc3ae;--acfg:#0a1a17;--warn:#3a2f12;--wbd:#e0a82e;--bad:#401c19;--bbd:#ef7b6e;--ok:#12332140;--obd:#5fc98a;--hl:#5a4f10}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:1rem/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.7rem;margin:.2em 0}h2{font-size:1.15rem;margin:0 0 .5rem}
+.sub{color:var(--mut);margin:0 0 1rem}
+textarea{width:100%;min-height:190px;padding:12px;border:2px solid var(--bd);border-radius:10px;background:var(--card);color:var(--fg);font:inherit;resize:vertical}
+textarea:focus-visible,button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button{font:inherit;font-weight:600;padding:10px 16px;border-radius:10px;border:2px solid var(--ac);background:transparent;color:var(--ac);cursor:pointer;min-height:44px}
+button.p{background:var(--ac);color:var(--acfg)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin:14px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat b{display:block;font-size:1.6rem}
+ul{margin:0;padding:0;list-style:none}
+li{padding:10px 12px;margin:8px 0;border-radius:8px;border-left:6px solid var(--bd);background:var(--bg)}
+li.bad{background:var(--bad);border-color:var(--bbd)}li.warn{background:var(--warn);border-color:var(--wbd)}li.ok{background:var(--ok);border-color:var(--obd)}
+li small{display:block;color:var(--mut)}
+mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 2px}
+.g{color:var(--mut);font-size:.9em}
+.note{color:var(--mut);font-size:.92rem}
+.wide{overflow-x:auto}
+</style></head>
+<body><main>
+<h1>📨 PlainNotice</h1>
+<p class="sub">Paste a confusing letter (a lease notice, benefits decision, school or medical bill). Get the deadlines, what to do, and what to watch out for, in plain words. <b>Everything stays on your device.</b> Nothing is uploaded, and it works offline.</p>
+<label for="in"><b>Paste the letter’s text here</b></label>
+<textarea id="in" placeholder="Paste text from a notice, letter, or email…"></textarea>
+<div class="row">
+<button class="p" onclick="run()">Decode this notice</button>
+<button onclick="sample()">Try a sample</button>
+<button onclick="$('in').value='';$('out').innerHTML=''">Clear</button>
+<button onclick="document.documentElement.classList.toggle('big')" aria-label="Toggle larger text">A+ Larger text</button>
+</div>
+<div id="out" aria-live="polite"></div>
+<p class="note">PlainNotice is a reading aid, not legal advice. It can miss things. Always read the original and ask someone you trust.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const GLOSS={"delinquent":"behind on payments","default":"not keeping to the agreement (often, not paying)","terminate":"end","tenancy":"your right to live there","tenant":"person renting","lessor":"landlord","lessee":"renter","remit":"send","pursuant to":"under","hereinafter":"from here on","forfeit":"lose","waive":"give up a right","arrears":"late money you owe","notwithstanding":"even though","indemnify":"cover the costs of","liable":"legally responsible","garnish":"take money from your pay","lien":"a legal claim on your property","cure":"fix the problem","eviction":"being forced to leave your home","adjudicate":"decide in court","prior to":"before","commence":"start","proceedings":"court steps","subsequent":"later","obligation":"something you must do","aforementioned":"mentioned above","premises":"the home or property","deem":"treat as","hereby":"by this letter","determination":"decision","sanction":"penalty","recoup":"get back","overpayment":"money paid to you by mistake that you may owe back","eligibility":"whether you qualify","denial":"a “no” decision","recertification":"proving again that you still qualify","quit":"move out","vacate":"move out"};
+const RISKS=[
+[/evict|\bquit\b|vacate/i,"Could lead to losing your home","bad"],
+[/terminat/i,"Something may be ended (a lease, benefit, or service)","bad"],
+[/garnish|\blien\b|collection/i,"Money could be taken from your pay or property","bad"],
+[/late fee|penalt|interest|sanction/i,"Extra costs may be added","warn"],
+[/legal action|court|proceedings|hearing/i,"A court or hearing process is involved","warn"],
+[/waive|forfeit|arbitration/i,"You may be giving up some rights","warn"],
+[/failure to|fail to|if you do not/i,"There is a consequence if you do nothing","warn"],
+[/appeal|dispute|contest|request a hearing|if you disagree/i,"You may have a right to challenge this. Check the time limit.","ok"]];
+const MON=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+const DRE=/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b|\b(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/gi;
+let spoken="",checklist="";
+function sy(w){w=w.toLowerCase().replace(/[^a-z]/g,"");if(w.length<=3)return 1;w=w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/,"").replace(/^y/,"");const m=w.match(/[aeiouy]{1,2}/g);return m?m.length:1}
+function dates(s){const o=[];for(const m of s.matchAll(DRE)){let mo,d,y;if(m[1]){mo=MON.indexOf(m[1].slice(0,3).toLowerCase());d=+m[2];y=+m[3]}else{mo=+m[4]-1;d=+m[5];y=+m[6];if(y<100)y+=2000}const dt=new Date(y,mo,d);if(dt.getMonth()===mo&&dt.getDate()===d)o.push(dt)}return o}
+function when(d){const t=new Date();t.setHours(0,0,0,0);const n=Math.round((d-t)/864e5);if(n<0)return[`${-n} day${-n==1?"":"s"} ago. Already passed.`,"bad"];if(n==0)return["TODAY","bad"];return[`in ${n} day${n==1?"":"s"}`,n<=7?"bad":n<=14?"warn":"ok"]}
+const fmt=d=>d.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+const li=(c,h,s)=>`<li class="${c}">${h}${s?`<small>${s}</small>`:""}</li>`;
+function run(){
+const raw=$("in").value.trim();
+if(!raw){$("out").innerHTML='<p class="note">Paste the text of a letter or notice first.</p>';return}
+const text=raw.replace(/\s+/g," ");
+const sents=(text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[]).map(s=>s.trim()).filter(Boolean);
+const words=text.match(/[A-Za-z’']+/g)||[];
+const syl=words.reduce((a,w)=>a+sy(w),0);
+const grade=Math.max(1,Math.round(0.39*words.length/Math.max(sents.length,1)+11.8*syl/Math.max(words.length,1)-15.59));
+// deadlines
+const dl=[],rel=[];
+sents.forEach(s=>{dates(s).forEach(d=>dl.push({d,s}));const r=s.match(/within\s+(\d+)\s+((?:business|calendar)\s+)?days?/i);if(r)rel.push({t:r[0],s})});
+dl.sort((a,b)=>a.d-b.d);
+// actions, risks, money
+const act=sents.filter(s=>/\b(must|shall|required|requires|need to|please (?:submit|send|call|bring|respond|pay|contact)|remit|respond|submit)\b/i.test(s)).slice(0,8);
+const flags=RISKS.map(([re,msg,c])=>{const s=sents.find(x=>re.test(x));return s?{msg,c,s}:null}).filter(Boolean);
+const money=sents.filter(s=>/\$\s?\d/.test(s)).map(s=>({a:[...new Set(s.match(/\$\s?[\d,]+(?:\.\d{2})?/g))].join(", "),s}));
+// plain-english version
+const keys=Object.keys(GLOSS).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+const re=new RegExp("\\b("+keys.join("|")+")\\b","gi");
+const plain=sents.map(s=>esc(s).replace(re,m=>{const g=GLOSS[m.toLowerCase()];return `<mark title="${g}">${m}</mark> <span class="g">(${g})</span>`})).join(" ");
+const jargon=new Set((text.match(re)||[]).map(x=>x.toLowerCase())).size;
+// outputs
+let h=`<div class="card stats"><div class="stat"><b>Grade ${grade}</b>reading level of this letter${grade>8?" (harder than most adults read comfortably)":""}</div><div class="stat"><b>${dl.length+rel.length}</b>deadline${dl.length+rel.length==1?"":"s"} found</div><div class="stat"><b>${jargon}</b>hard word${jargon==1?"":"s"} explained</div></div>`;
+h+=`<div class="card"><h2>⏰ Deadlines</h2><ul>`;
+let cl=["TO-DO LIST FROM MY NOTICE"],sp=[`This letter is written at about grade ${grade} reading level.`];
+if(dl.length||rel.length){dl.forEach(x=>{const[w,c]=when(x.d);h+=li(c,`<b>${fmt(x.d)}</b> (${w})`,esc(x.s));cl.push(`- By ${fmt(x.d)}: ${x.s}`);sp.push(`Deadline: ${fmt(x.d)}, ${w}.`)});
+rel.forEach(x=>{h+=li("warn",`<b>${esc(x.t)}</b> of the date on the letter`,esc(x.s));cl.push(`- ${x.t}: ${x.s}`);sp.push(`Deadline: ${x.t} of the date on the letter.`)})}
+else h+=`<p class="note">No deadlines found. Check the original for dates written another way.</p>`;
+h+=`</ul></div>`;
+h+=`<div class="card"><h2>✅ What you are being asked to do</h2><ul>`;
+if(act.length){sp.push("What you need to do:");act.forEach(s=>{h+=li("",esc(s));cl.push(`- ${s}`);sp.push(s)})}else h+=`<p class="note">No clear instructions found.</p>`;
+h+=`</ul></div>`;
+if(flags.length){h+=`<div class="card"><h2>⚠️ Watch out</h2><ul>`;flags.forEach(f=>h+=li(f.c,`<b>${f.msg}</b>`,esc(f.s)));h+=`</ul></div>`;sp.push(`${flags.filter(f=>f.c!="ok").length} warning signs were found.`)}
+if(money.length){h+=`<div class="card"><h2>💵 Money mentioned</h2><ul>`;money.forEach(m=>h+=li("",`<b>${esc(m.a)}</b>`,esc(m.s)));h+=`</ul></div>`}
+h+=`<div class="card"><h2>📖 Your letter with hard words explained</h2><p>${plain}</p></div>`;
+h+=`<div class="card"><h2>Next steps</h2><div class="row"><button class="p" onclick="speak()">🔊 Read summary aloud</button><button onclick="speechSynthesis.cancel()">Stop</button><button onclick="copyList()">📋 Copy to-do list</button></div><p class="note" id="msg"></p>
+<p>Need a person to help? In the US, dial <b>211</b> for local help, or find free legal aid at <b>lawhelp.org</b>. Take this list and the original letter with you.</p></div>`;
+spoken=sp.join(" ");checklist=cl.join("\n");
+$("out").innerHTML=h;$("out").scrollIntoView({behavior:"smooth"});
+}
+function speak(){const m=$("msg");if(!("speechSynthesis" in window)){m.textContent="Read-aloud is not supported in this browser.";return}try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(spoken);u.rate=.9;speechSynthesis.speak(u)}catch(e){m.textContent="Read-aloud could not start."}}
+function copyList(){const m=$("msg");const ok=()=>m.textContent="Copied. Paste it into your notes or a message.";const fb=()=>{const t=document.createElement("textarea");t.value=checklist;document.body.appendChild(t);t.select();try{document.execCommand("copy");ok()}catch(e){m.textContent="Could not copy. Select the text above instead."}t.remove()};try{navigator.clipboard.writeText(checklist).then(ok,fb)}catch(e){fb()}}
+function sample(){$("in").value="NOTICE TO PAY RENT OR QUIT. Pursuant to your lease, you are delinquent in the amount of $1,350.00 in arrears. You must remit full payment on or before December 3, 2026. Failure to cure this default may result in the landlord seeking to terminate your tenancy and commence eviction proceedings. You may also be liable for late fees of $75.00 and court costs. If you wish to dispute this amount, you must respond in writing within 10 days of this notice. A hearing has been tentatively set for 12/15/2026 at the county courthouse. Please bring proof of any payments already made.";run()}
+</script></body></html>
