@@ -2,7 +2,7 @@
 
 Turn confusing official letters (lease notices, benefits decisions, medical bills) into plain-English deadlines, warnings, and a to-do list. Built for EvoHacks 2.0, theme: Projects for Social Good.
 
-**Live demo:** https://claude.ai/artifact/4sbvGfjmVdjyXL3RiesKa6 (or open `index.html` locally)
+**Live demo:** https://anishdonthineni.github.io/plainnotice/ (or open `index.html` locally)
 
 ## Run it
 No install, no build, no API keys, no accounts.
