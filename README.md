@@ -36,7 +36,7 @@ Rules instead of a hosted AI model, on purpose: results are predictable and expl
 It is a reading aid, not legal advice. Pattern matching can miss context, dates written in unusual formats, and non-English letters. The reading grade is an estimate. Always check the original letter and ask a trusted person or legal aid (US: dial 211, lawhelp.org).
 
 ## Built during the event / AI credit
-All code and text were created during EvoHacks 2.0. No pre-existing code, templates, assets, or external libraries. AI assistance (Claude by Anthropic) helped plan and write the code and documentation; the author can explain how it works.
+All code and text were created during EvoHacks 2.0. No pre-existing code, templates, assets, or external libraries. AI helped plan and debug the code
 
 ## Roadmap
 Photo/PDF input with on-device OCR, calendar export, more languages and a community-reviewed glossary, letter-type templates, and testing with legal aid clinics.
