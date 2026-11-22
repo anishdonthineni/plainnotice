@@ -31,7 +31,7 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 2px}
 .wide{overflow-x:auto}
 </style></head>
 <body><main>
-<h1>📨 PlainNotice</h1>
+<h1>PlainNotice</h1>
 <p class="sub">Paste a confusing letter (a lease notice, benefits decision, school or medical bill). Get the deadlines, what to do, and what to watch out for, in plain words. <b>Everything stays on your device.</b> Nothing is uploaded, and it works offline.</p>
 <label for="in"><b>Paste the letter’s text here</b></label>
 <textarea id="in" placeholder="Paste text from a notice, letter, or email…"></textarea>
@@ -88,19 +88,19 @@ const plain=sents.map(s=>esc(s).replace(re,m=>{const g=GLOSS[m.toLowerCase()];re
 const jargon=new Set((text.match(re)||[]).map(x=>x.toLowerCase())).size;
 // outputs
 let h=`<div class="card stats"><div class="stat"><b>Grade ${grade}</b>reading level of this letter${grade>8?" (harder than most adults read comfortably)":""}</div><div class="stat"><b>${dl.length+rel.length}</b>deadline${dl.length+rel.length==1?"":"s"} found</div><div class="stat"><b>${jargon}</b>hard word${jargon==1?"":"s"} explained</div></div>`;
-h+=`<div class="card"><h2>⏰ Deadlines</h2><ul>`;
+h+=`<div class="card"><h2>Deadlines</h2><ul>`;
 let cl=["TO-DO LIST FROM MY NOTICE"],sp=[`This letter is written at about grade ${grade} reading level.`];
 if(dl.length||rel.length){dl.forEach(x=>{const[w,c]=when(x.d);h+=li(c,`<b>${fmt(x.d)}</b> (${w})`,esc(x.s));cl.push(`- By ${fmt(x.d)}: ${x.s}`);sp.push(`Deadline: ${fmt(x.d)}, ${w}.`)});
 rel.forEach(x=>{h+=li("warn",`<b>${esc(x.t)}</b> of the date on the letter`,esc(x.s));cl.push(`- ${x.t}: ${x.s}`);sp.push(`Deadline: ${x.t} of the date on the letter.`)})}
 else h+=`<p class="note">No deadlines found. Check the original for dates written another way.</p>`;
 h+=`</ul></div>`;
-h+=`<div class="card"><h2>✅ What you are being asked to do</h2><ul>`;
+h+=`<div class="card"><h2>What you are being asked to do</h2><ul>`;
 if(act.length){sp.push("What you need to do:");act.forEach(s=>{h+=li("",esc(s));cl.push(`- ${s}`);sp.push(s)})}else h+=`<p class="note">No clear instructions found.</p>`;
 h+=`</ul></div>`;
-if(flags.length){h+=`<div class="card"><h2>⚠️ Watch out</h2><ul>`;flags.forEach(f=>h+=li(f.c,`<b>${f.msg}</b>`,esc(f.s)));h+=`</ul></div>`;sp.push(`${flags.filter(f=>f.c!="ok").length} warning signs were found.`)}
-if(money.length){h+=`<div class="card"><h2>💵 Money mentioned</h2><ul>`;money.forEach(m=>h+=li("",`<b>${esc(m.a)}</b>`,esc(m.s)));h+=`</ul></div>`}
-h+=`<div class="card"><h2>📖 Your letter with hard words explained</h2><p>${plain}</p></div>`;
-h+=`<div class="card"><h2>Next steps</h2><div class="row"><button class="p" onclick="speak()">🔊 Read summary aloud</button><button onclick="speechSynthesis.cancel()">Stop</button><button onclick="copyList()">📋 Copy to-do list</button></div><p class="note" id="msg"></p>
+if(flags.length){h+=`<div class="card"><h2>Watch out</h2><ul>`;flags.forEach(f=>h+=li(f.c,`<b>${f.msg}</b>`,esc(f.s)));h+=`</ul></div>`;sp.push(`${flags.filter(f=>f.c!="ok").length} warning signs were found.`)}
+if(money.length){h+=`<div class="card"><h2>Money mentioned</h2><ul>`;money.forEach(m=>h+=li("",`<b>${esc(m.a)}</b>`,esc(m.s)));h+=`</ul></div>`}
+h+=`<div class="card"><h2>Your letter with hard words explained</h2><p>${plain}</p></div>`;
+h+=`<div class="card"><h2>Next steps</h2><div class="row"><button class="p" onclick="speak()">Read summary aloud</button><button onclick="speechSynthesis.cancel()">Stop</button><button onclick="copyList()">Copy to-do list</button></div><p class="note" id="msg"></p>
 <p>Need a person to help? In the US, dial <b>211</b> for local help, or find free legal aid at <b>lawhelp.org</b>. Take this list and the original letter with you.</p></div>`;
 spoken=sp.join(" ");checklist=cl.join("\n");
 $("out").innerHTML=h;$("out").scrollIntoView({behavior:"smooth"});
